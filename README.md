@@ -65,23 +65,25 @@ I pulled a slight hack:  Because the priors can only be in [0,1], I constrained 
 
 Well how does it do? I tested it in two ways. One, by  randomly mislabling some fraction of the training labels, retraining, and determining test accuracy for the standard logistic regression and for the prior-weighted logistic regression. The plot below shows what it found. 
 
-![Image of Yaktocat](logRegResults1.png)
+![Test Accuracy Results](logRegResults1.png)
 
-First, we see that for 0% relabled data, the accuracy increaced from 83% to 87%. That is cool. More on this later.
+I tested three combinations of models and data. Green line showed the logistic Regression+prior, Blue was just logistic Regression, and red was the logistic regression examining _only_ the data that hadn't been mislabeled. We can see several things
+1. For 0% relabled data, the accuracy increaced from 83% to 87%. That is cool. More on this later.
+2. For 60% relabeled data, the accuracy was much improvedxx...
 
-With the same initializations, the that the prior corrected version improved the  classification accuracy on the test set considerably! For randomly mislabled, when 60% was incorrect data (only 40% labeled correctly) it still gets ~60% classification accuracy. For confused labling (1->2 some % of the time, I found that it did pretty well also. xx 
+Also, I examined the convergence time. For the models using the priors, 
+![Test Accuracy Results](logRegResults1.png)
 
-### Notes
-1. I did some long time durations and found that the accuracy very gradually got worse as I continued to train, possibly due to data gradually being 'thrown out'. So I just threw in early stopping.
-2. 
+We can see that the model that used priors converged sooner. This is nice!
 
-
-### Important details. I used the same initializations, and ended up running this a number of time, and the results are quantitatively similar. I didn't save the outputs all the time, as I'm working on learning pandas etc and recording datas. 
-
-
+### Notes and details
+* I ran iterations way beyond normal and found that the accuracy gradually got worse as I continued to train. This is possibly due to data gradually being 'thrown out'. So I just threw in early stopping.
+* I used the same initializations for each of the different experiments. 
+* I running this a number of time, and the results are quantitatively similar. 
+* I didn't optimize learning rates or prior initialization. It is possible that these can impact
 
 ##Results using an Artificial Neural Network
-The logistic regression is not the best tool for this classification task, as can be seen by the low accuracy. What about a Neural Network. Will that do better? using an architecture with hidden nodes of 500 and 100, both initialized with a random normal distribution with width sqrt(6/(n_this +n_prev)) (a common heuristic highlighted by Bengio among many other authors)
+The logistic regression is not the best tool for this classification task, as can be seen by the low accuracy. What about a Neural Network. Will that do better? using an architecture with hidden nodes of 500 and 100, both initialized with a random normal distribution with width <MATH>sqrt(6/(n<sub>this</sub> +n<sub>prev</sub>))</MATH>,  common heuristic highlighted by [Glorot and Bengio](http://jmlr.org/proceedings/papers/v9/glorot10a/glorot10a.pdf) (among many other authors). 
 
 xx picture and discussion here xx
 
@@ -89,14 +91,15 @@ xx picture and discussion here xx
 xxx Covnet
 I'm going to use a convolution neural network that is known to get good accuracy. Here is the next step. I'm going to update this when I do it. 
 
+#Considerations and observations
+1. One interesting thing to consider, is this will start 'throwing out' examples when the prior becomes 0. That might not be a good thing, especially if we are data limited. So, instead of just classifying data priors as _useful_ or _not useful_, I classified data priors as _'representative of class j_. So now, the probability goes as <MATH>p_<sub>i,j</sub></MATH>. This can be backpropigated in much the similar way. I found similar results as for the previous method 
+
 #Variations
 1. Minibatches:  I also performed this using mini batches. For every batch I would initialize their priors to 90% and iterate 10 times. Yes, the mini-batch iteration count is another hyperparameter... but it worked.  For the logistic regression, this technique did just as well as the non mini-batch approach. It also has the effect of not completely throwing out data. The Neuralnet, it seemed that the parameters would too-easily learn the parameters to classify the subset, and the representation wouldn't transfer to the other subsets. It is possible that keeping a record of the priors so if the next subset of data was reconsidered, labels would be re-initialized, and then the algorithm wouldn't iterate too many times over the minibatch. 
 Obviously, this technique wouldn't make as sense in online learning (minibatch of one example)
 2. Sigmoid instead of relu6: I tried some variations on how to express the priors. I took a sigmoid of the priors, and found that convergence took forever. I tried 
-3. Randoml Re-initialize priors to remove dropouts?
+3. Randomly Re-initialize priors? Because early training might inaccurately cause data to be 'dropped out', it might be beneficial to 'drop them in' by adding a probability that they actually weren't bad at all. 
 
-#Considerations and observations
-1. One interesting thing to consider, is this will start 'throwing out' examples when the prior becomes 0. That might not be a good thing, especially if we are data limited. So, instead of just classifying data priors as _useful_ or _not useful_, I classified data priors as _'representative of class j_. So now, the probability goes as <MATH>p_<sub>i,j</sub></MATH>. This can be backpropigated in much the similar way. I found similar results as for the previous method 
 
 #DISCUSSION
 ##Related to Dropout?
