@@ -13,9 +13,11 @@ While linear regression etc accounts for the uncertainty in a measurement, the N
 This is not an idea that hasn't been considered. In fact, there is an increadible amount of literature on it. I haven't even had a chance to begin to scratch the surface. 
 But I wanted to play with TensorFlow, improve my pythoning, and more thoroughly explore the idea of poorly labeled data. 
 After implementing it, I found it closesly resembles an idea by 
-<a href="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=0ahUKEwjYrKSXxPbMAhUDM1IKHR77CbEQFggdMAA&url=http%3A%2F%2Fwww.eng.biu.ac.il%2Fgoldbej%2Ffiles%2F2012%2F05%2Ficassp_2016_Alan.pdf&usg=AFQjCNENVQDhdMwYs3O979y5yayJmw9g5A&sig2=Q6xB9CcN297mgPh-CQMq3Q">  by Bekker and  Goldberger </a>
-If it has already been considered and explored, please let me know! Given it's simplicity, and wide-spread applicability, I would be impressed if it hadn't been published already. I'm just new to the field... so finding the originators is hard.
+<a href="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=0ahUKEwjYrKSXxPbMAhUDM1IKHR77CbEQFggdMAA&url=http%3A%2F%2Fwww.eng.biu.ac.il%2Fgoldbej%2Ffiles%2F2012%2F05%2Ficassp_2016_Alan.pdf&usg=AFQjCNENVQDhdMwYs3O979y5yayJmw9g5A&sig2=Q6xB9CcN297mgPh-CQMq3Q">  by Bekker and  Goldberger </a>. I also found this reference, though it is more difficult to to parse what is going on
+xx
 
+If you know that has already been considered and explored, please let me know! Given it's simplicity, and wide-spread applicability, I would be impressed if it hadn't been published already. I'm starting to do research... so reading everything is ~~hard~~ impossible.
+##The IDEA
 Basically, all inputs should be associated with prior probabilities as to their quality. What is 'quality'? To remain vague I'd say it is its measure of use in forming a representation. 
 For instance, a mislabeled 1 as a 5 can unfortunately distort neuron weights. So, why should it be used in the training? Additionally, an incredibly unique and/or distorted image that has an 'appropriate' label, might not actually prove useful. I mean, of the Mnist entries I cannot identify accurately...
 
@@ -29,11 +31,11 @@ where the individual training example j is the cost for that individual example.
 
 This will more accurately represent the deviation from expected because examples with small priors won't influence the cost. Now, here is the idea: these priors are new 'parameters' that can be learned! So we compute gradients, and can update via backpropigation just like the weights. Lets look at the partial derivitive of J used in this, because it helps me to see what the gradient does. Basically, the partial derivative is:
 
-<MATH>&part; J / &part; p<sub>i</sub> = (J<sub>i</sub> &sum; p<sub>j</sub>- </MATH>
+<MATH>&part; J / &part; p<sub>i</sub> = (J<sub>i</sub> &sum; p<sub>j</sub>- &sum; p<sub>j</sub>J<sub>j</sub>)/(&sum;p<sub>j</sub>)<sup>2</sup>  </MATH>
 
 Well, then this is
 
-<MATH>&part; J / &part; p<sub>i</sub> = J<sub>i</sub> - J </MATH>
+<MATH>&part; J / &part; p<sub>i</sub> = (J<sub>i</sub> - J)/&sum; p<sub>j</sub> </MATH>
 
 So, for example i, the prior should change in a manner that is proprotional to the deviation of the cost for example i from the (weighted) average cost J. Because we go the direction opposite of this slope, the prior should <b> increase </b> if
 <MATH> J<sub>i</sub> &le; J <MATH>. In otherwords, if it is a low cost, we should weight example i more. And visa-versa. 
