@@ -23,11 +23,11 @@ For instance, a mislabeled 1 as a 5 can unfortunately distort neuron weights. So
 
 How do we determine the probabilities? We update them just like we update the neuron weights, with back-propigation!
 
- 
+
 The basic concept occurs at the end of the feed-forward step, the calculation of the cost function J. This is represented
 <MATH> J = &sum;<sub>j</sub> J<sub>j</sub></MATH>
 where the individual training example j is the cost for that individual example. Well, this is effectively a the mean of the cost, given the batch sizes are the same on each iteration. Why shouldn't we take a weighted mean, where the weights are the priors. <MATH>p<sub>j</sub></MATH> of that example j?
-<MATH> J = &sum;<sub>j</sub> p<sub>j</sub>J<sub>j</sub> / &sum; p<sub>j</sub></MATH>
+<MATH> J = &sum;<sub>j</sub> p<sub>j</sub>J<sub>j</sub>/&sum; p<sub>j</sub></MATH>
 
 This will more accurately represent the deviation from expected because examples with small priors won't influence the cost. Now, here is the idea: these priors are new 'parameters' that can be learned! So we compute gradients, and can update via backpropigation just like the weights. Lets look at the partial derivitive of J used in this, because it helps me to see what the gradient does. Basically, the partial derivative is:
 
@@ -64,10 +64,20 @@ The relevant code is merely a few more additional lines:
 I pulled a slight hack:  Because the priors can only be in [0,1], I constrained them with the rectified linear function (tf.nn.relu6). For a reason that I don't know, it stops increasing when the input is 6, so I multiply the priors by 6 to have them within [0,1]. Another obvious step, is once the representation is trained, we do not use the priors anymore. So the extra parameters are not part of future classifications. They were just a tool to get a better set of weights. 
 
 Well how does it do? I tested it in two ways. One, by  randomly mislabling some fraction of the training labels, retraining, and determining test accuracy for the standard logistic regression and for the prior-weighted logistic regression. The plot below shows what it found. 
-xx input picture. 
+
+![Image of Yaktocat](logRegResults1.png)
+
+First, we see that for 0% relabled data, the accuracy increaced from 83% to 87%. That is cool. More on this later.
+
 With the same initializations, the that the prior corrected version improved the  classification accuracy on the test set considerably! For randomly mislabled, when 60% was incorrect data (only 40% labeled correctly) it still gets ~60% classification accuracy. For confused labling (1->2 some % of the time, I found that it did pretty well also. xx 
 
-As an interesting side-note, the fluctuation of loss at high time-steps is fairly constant* (I did some long time durations and found that the accuracy very gradually got worse as I continued to train, likely due to more data gradually being 'thrown out'.
+### Notes
+1. I did some long time durations and found that the accuracy very gradually got worse as I continued to train, possibly due to data gradually being 'thrown out'. So I just threw in early stopping.
+2. 
+
+
+### Important details. I used the same initializations, and ended up running this a number of time, and the results are quantitatively similar. I didn't save the outputs all the time, as I'm working on learning pandas etc and recording datas. 
+
 
 
 ##Results using an Artificial Neural Network
