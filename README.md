@@ -13,13 +13,11 @@ While linear regression etc accounts for the uncertainty in a measurement, the N
 This is not an idea that hasn't been considered. In fact, there is an increadible amount of literature on it. I haven't even had a chance to begin to scratch the surface. 
 But I wanted to play with TensorFlow, improve my pythoning, and more thoroughly explore the idea of poorly labeled data. 
 After implementing it, I found it closesly resembles an idea by 
-<a href="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=0ahUKEwjYrKSXxPbMAhUDM1IKHR77CbEQFggdMAA&url=http%3A%2F%2Fwww.eng.biu.ac.il%2Fgoldbej%2Ffiles%2F2012%2F05%2Ficassp_2016_Alan.pdf&usg=AFQjCNENVQDhdMwYs3O979y5yayJmw9g5A&sig2=Q6xB9CcN297mgPh-CQMq3Q">  by Bekker and  Goldberger </a>. I also found this reference, though it is more difficult to to parse what is going on
-[Natarajan](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=0ahUKEwjC69f46v_MAhUN5GMKHZwhAIIQFggiMAA&url=http%3A%2F%2Fpapers.nips.cc%2Fpaper%2F5073-learning-with-noisy-labels.pdf&usg=AFQjCNFgDWcK8n9bC9-2GbVVNnnR0Eys9g&sig2=OSSO47kEX5O0zG_odurS1Q)
-
-If you know that has already been considered and explored, please let me know! Given it's simplicity, and wide-spread applicability, I would be impressed if it hadn't been published already. I'm starting to do research... so reading everything is ~~hard~~ impossible.
+<a href="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=0ahUKEwjYrKSXxPbMAhUDM1IKHR77CbEQFggdMAA&url=http%3A%2F%2Fwww.eng.biu.ac.il%2Fgoldbej%2Ffiles%2F2012%2F05%2Ficassp_2016_Alan.pdf&usg=AFQjCNENVQDhdMwYs3O979y5yayJmw9g5A&sig2=Q6xB9CcN297mgPh-CQMq3Q">  by Bekker and  Goldberger </a>. I also found this reference by [Natarajan](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=0ahUKEwjC69f46v_MAhUN5GMKHZwhAIIQFggiMAA&url=http%3A%2F%2Fpapers.nips.cc%2Fpaper%2F5073-learning-with-noisy-labels.pdf&usg=AFQjCNFgDWcK8n9bC9-2GbVVNnnR0Eys9g&sig2=OSSO47kEX5O0zG_odurS1Q)
+, though it is more difficult to to parse what is going on. I'll have to do that later. If you know that has already been considered and explored, please let me know! Given it's simplicity, and wide-spread applicability, I would be impressed if it hadn't been published or if it is a textbook exercize. I'm starting to play with ML... so reading everything is ~~hard~~ impossible.
 
 ##The Idea
-Basically, all inputs should be associated with prior probabilities as to their quality. What is 'quality'? To remain vague I'd say it is its measure of use in forming a representation. 
+Basically, all inputs should be associated with prior probabilities as to their quality. What is 'quality'? To intentionally remain vague I'd say it is its measure of use in forming a representation. 
 For instance, a mislabeled 1 as a 5 can unfortunately distort neuron weights. So, why should it be used in the training? Additionally, an incredibly unique and/or distorted image that has an 'appropriate' label, might not actually prove useful. I mean, of the Mnist entries I cannot identify accurately...
 
 How do we determine the probabilities? We update them just like we update the neuron weights, with back-propigation!
@@ -67,13 +65,20 @@ Well how does it do? I tested it in two ways. One, by  randomly mislabling some 
 ![Test Accuracy Results](logRegResults1.png)
 
 I tested three combinations of models and data. Green line showed the logistic Regression+prior, Blue was just logistic Regression, and red was the logistic regression examining _only_ the data that hadn't been mislabeled. We can see several things
-1. For 0% relabled data, the accuracy increaced from 83% to 87%. That is cool. More on this later.
+1. For 0% relabled data, the accuracy increaced from 83% to 87%. That is cool. More on this soon.
 2. For 60% relabeled data, the accuracy was much improvedxx...
 
 Also, I examined the convergence time. For the models using the priors, 
 ![Test Accuracy Results](logRegResults1.png)
 
-We can see that the model that used priors converged sooner. This is nice!
+We can see that the model that used priors converged sooner. This is nice... let's look into this further.
+
+### Adding L2 regularization
+Adding L2 regularization to the weights can have a big impact on the progress of the model. When I added this to both models, the accuracy went to 88.8% or 88.7% for 0% relabeled data for both models. It seems like the priors are behaving as some sort of regularization parameter, or, rather, the regularization prevents learning of 'non standard' examples. This is a hypothesis that could be tested. 
+
+
+
+
 
 ### Notes and details
 * I ran iterations way beyond normal and found that the accuracy gradually got worse as I continued to train. This is possibly due to data gradually being 'thrown out'. So I just threw in early stopping.
@@ -84,7 +89,7 @@ We can see that the model that used priors converged sooner. This is nice!
 ##Results using an Artificial Neural Network
 The logistic regression is not the best tool for this classification task, as can be seen by the low accuracy. What about a Neural Network. Will that do better? using an architecture with hidden nodes of 500 and 100, both initialized with a random normal distribution with width <MATH>sqrt(6/(n<sub>this</sub> +n<sub>prev</sub>))</MATH>,  common heuristic highlighted by [Glorot and Bengio](http://jmlr.org/proceedings/papers/v9/glorot10a/glorot10a.pdf) (among many other authors). 
 
-xx picture and discussion here xx
+xx 
 
 ##Results using a Convolutional Neural Network
 xx
@@ -101,6 +106,9 @@ Obviously, this technique wouldn't make as sense in online learning (minibatch o
 
 
 #DISCUSSION
+## Accuracy is better in general.
+Why is this? 
+
 ##Related to Dropout?
 It seems that this might be a contributing factor to 'dropout' techniques that are used to prevent neurons from 'over representing' a given examples. 
 
